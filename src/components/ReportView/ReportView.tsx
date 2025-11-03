@@ -50,8 +50,8 @@ export default function ReportView({ onClose }: ReportViewProps) {
 
   return (
     <div className="h-screen bg-gray-50 overflow-y-auto" style={{ padding: '1rem', height: '100vh' }}>
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg" style={{ padding: '1rem' }}>
-        <div className="flex justify-between items-center mb-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg">
+        <div className="flex justify-between items-center" style={{ marginBottom: '1rem' }}>
           <button
             onClick={handleShare}
             className="bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
@@ -68,7 +68,7 @@ export default function ReportView({ onClose }: ReportViewProps) {
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
           <section>
             <h2 className="text-xl font-semibold mb-4">{t('report.statistics')}</h2>
             <div className="overflow-x-auto">
@@ -143,7 +143,7 @@ export default function ReportView({ onClose }: ReportViewProps) {
 
           {report.absentParticipants.length > 0 && (
             <section>
-              <h2 className="text-xl font-semibold mb-4">{t('report.absentParticipants')}</h2>
+              <h2 className="text-xl font-semibold mb-4" style={{ marginBottom: '0.1rem' }}>{t('report.absentParticipants')}</h2>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>

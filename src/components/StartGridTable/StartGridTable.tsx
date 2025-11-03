@@ -159,7 +159,7 @@ export default function StartGridTable({ rows, maxCorridors, competitionTitle }:
       }}
     >
       <div className="bg-blue-600 text-white px-4 py-3 text-center shadow-md">
-        <h1 className="text-xl font-bold">{competitionTitle}</h1>
+        <h2 className="text-xl font-bold">{competitionTitle}</h2>
       </div>
       {!isTimerHidden && (
         <div className="bg-white px-4 py-4 text-center">
