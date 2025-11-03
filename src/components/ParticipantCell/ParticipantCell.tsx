@@ -34,7 +34,18 @@ export default function ParticipantCell({
 
   const handleTouchStart = () => {
     if (!timerStarted) return; // Блокируем, если таймер не запущен
+    
+    // Проверяем, есть ли overlay в DOM (любой StatusMenu или ContextMenu)
+    const statusMenuOverlay = document.querySelector('[data-status-menu-overlay="true"]');
+    const contextMenuOverlay = document.querySelector('[data-context-menu-overlay="true"]');
+    
+    // Если есть overlay - не обрабатываем касание
+    if (statusMenuOverlay || contextMenuOverlay) {
+      return;
+    }
+    
     longPressTimer.current = window.setTimeout(() => {
+      console.log('Long press detected, opening menu');
       menuJustOpenedRef.current = true;
       setShowMenu(true);
       // Сбрасываем флаг через небольшую задержку
@@ -65,8 +76,19 @@ export default function ParticipantCell({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!timerStarted) return; // Блокируем, если таймер не запущен
+    
+    // Проверяем, есть ли overlay в DOM (любой StatusMenu или ContextMenu)
+    const statusMenuOverlay = document.querySelector('[data-status-menu-overlay="true"]');
+    const contextMenuOverlay = document.querySelector('[data-context-menu-overlay="true"]');
+    
+    // Если есть overlay - не обрабатываем клик
+    if (statusMenuOverlay || contextMenuOverlay) {
+      return;
+    }
+    
     if (e.button === 0) { // Левая кнопка мыши
       longPressTimer.current = window.setTimeout(() => {
+        console.log('Long press detected, opening menu');
         menuJustOpenedRef.current = true;
         setShowMenu(true);
         // Сбрасываем флаг через небольшую задержку
@@ -99,11 +121,17 @@ export default function ParticipantCell({
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!timerStarted) return; // Блокируем, если таймер не запущен
-    // Если меню только что открылось или уже открыто, не обрабатываем клик
-    if (showMenu || menuJustOpenedRef.current) {
+    
+    // Проверяем, есть ли overlay в DOM (любой StatusMenu или ContextMenu)
+    const statusMenuOverlay = document.querySelector('[data-status-menu-overlay="true"]');
+    const contextMenuOverlay = document.querySelector('[data-context-menu-overlay="true"]');
+    
+    // Если меню открыто или есть overlay - не обрабатываем клик
+    if (showMenu || menuJustOpenedRef.current || statusMenuOverlay || contextMenuOverlay) {
       e.stopPropagation();
       return;
     }
+    
     // Быстрое нажатие - только если статус еще не установлен
     if (status === 'not_set') {
       onQuickClick();
@@ -161,15 +189,19 @@ export default function ParticipantCell({
         </div>
       </div>
       {showMenu && (
-        <StatusMenu
-          person={person}
-          currentStatus={status}
-          onClose={() => {
-            menuJustOpenedRef.current = false;
-            setShowMenu(false);
-          }}
-          onStatusChange={onStatusChange}
-        />
+        <>
+          {console.log('Rendering StatusMenu, showMenu:', showMenu)}
+          <StatusMenu
+            person={person}
+            currentStatus={status}
+            onClose={() => {
+              console.log('StatusMenu onClose called');
+              menuJustOpenedRef.current = false;
+              setShowMenu(false);
+            }}
+            onStatusChange={onStatusChange}
+          />
+        </>
       )}
     </>
   );

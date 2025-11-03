@@ -47,6 +47,10 @@
   "project": {
     "noProjects": "Жобалар табылмады",
     "createFirst": "SportOrg-тан HTML файлын импорттау арқылы алғашқы жобаңызды жасаңыз"
+  },
+  "table": {
+    "time": "Уақыт",
+    "corridor": "Дәліз"
   }
 }
 

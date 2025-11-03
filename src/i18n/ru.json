@@ -47,6 +47,10 @@
   "project": {
     "noProjects": "Проекты не найдены",
     "createFirst": "Создайте первый проект, импортировав HTML файл из SportOrg"
+  },
+  "table": {
+    "time": "Время",
+    "corridor": "Коридор"
   }
 }
 

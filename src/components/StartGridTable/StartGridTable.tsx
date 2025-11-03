@@ -190,10 +190,10 @@ export default function StartGridTable({ rows, maxCorridors, competitionTitle }:
       <table className="w-full border-collapse bg-white">
         <thead className="sticky top-0 bg-gray-100 z-10">
           <tr>
-            <th className="border border-gray-300 p-2 text-center font-semibold">Время</th>
+            <th className="border border-gray-300 p-2 text-center font-semibold">{t('table.time')}</th>
             {Array.from({ length: maxCorridors }, (_, i) => (
               <th key={i} className="border border-gray-300 p-2 text-center font-semibold">
-                Коридор {i + 1}
+                {t('table.corridor')} {i + 1}
               </th>
             ))}
           </tr>

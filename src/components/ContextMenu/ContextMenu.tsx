@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useProject } from '../../contexts/ProjectContext';
 import { useTranslation } from 'react-i18next';
 import { calculateIntervals } from '../../utils/time';
 import ResetTimerDialog from '../ResetTimerDialog/ResetTimerDialog';
 import DeleteProjectDialog from '../DeleteProjectDialog/DeleteProjectDialog';
+import { createPortal } from 'react-dom';
 
 interface ContextMenuProps {
   onShowReport: () => void;
@@ -26,6 +27,8 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const handleDeleteProject = useCallback(() => {
     if (currentProject) {
@@ -44,6 +47,123 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
   const handleDialogConfirm = useCallback(() => {
     handleDeleteProject();
   }, [handleDeleteProject]);
+
+  // Блокируем скролл и клики когда меню открыто
+  useEffect(() => {
+    if (!isOpen) {
+      document.body.style.overflow = '';
+      return;
+    }
+
+    document.body.style.overflow = 'hidden';
+
+    // Блокируем все клики вне меню, чтобы они не дошли до ячеек
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      
+      // Если клик был внутри меню, разрешаем его (не блокируем)
+      if (menuRef.current && menuRef.current.contains(target)) {
+        return;
+      }
+      
+      // Если клик был по overlay или его дочерним элементам (но не внутри меню) - блокируем событие
+      // чтобы оно не дошло до элементов под overlay, и закрываем меню
+      if (overlayRef.current && overlayRef.current.contains(target)) {
+        // Блокируем событие полностью, чтобы оно не дошло до элементов под overlay
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        // Вызываем закрытие меню асинхронно, чтобы не мешать блокировке события
+        setTimeout(() => {
+          setIsOpen(false);
+          setShowLanguageMenu(false);
+        }, 0);
+        return;
+      }
+      
+      // Во всех остальных случаях (клик вне overlay) - блокируем событие и закрываем меню
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      setTimeout(() => {
+        setIsOpen(false);
+        setShowLanguageMenu(false);
+      }, 0);
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      handleClickOutside(e);
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      handleClickOutside(e);
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      handleClickOutside(e);
+    };
+
+    // Добавляем обработчики с capture фазой, чтобы перехватывать события до других обработчиков
+    document.addEventListener('mousedown', handleMouseDown, true);
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('touchstart', handleTouchStart, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown, true);
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('touchstart', handleTouchStart, true);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    
+    // Если клик был внутри меню, не закрываем
+    if (menuRef.current && menuRef.current.contains(target)) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+    
+    // Во всех остальных случаях - закрываем меню и блокируем всплытие
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    setIsOpen(false);
+    setShowLanguageMenu(false);
+  };
+
+  const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    
+    // Если клик был внутри меню, не закрываем
+    if (menuRef.current && menuRef.current.contains(target)) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+    
+    // Во всех остальных случаях - закрываем меню и блокируем всплытие
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    setIsOpen(false);
+    setShowLanguageMenu(false);
+  };
+
+  const handleOverlayTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    
+    // Если касание было внутри меню, не закрываем
+    if (menuRef.current && menuRef.current.contains(target)) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+    
+    // Во всех остальных случаях - закрываем меню и блокируем всплытие
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    setIsOpen(false);
+    setShowLanguageMenu(false);
+  };
 
   if (!currentProject) return null;
 
@@ -157,7 +277,7 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-16 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center"
+        className="w-16 h-16 text-white rounded-full transition-colors flex items-center justify-center"
         style={{
           position: 'fixed',
           bottom: '1rem',
@@ -171,27 +291,77 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
           margin: 0,
           padding: 0,
           border: 'none',
-          outline: 'none'
+          outline: 'none',
+          backgroundColor: '#1f2937'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#374151';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#1f2937';
         }}
         aria-label="Меню"
       >
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '2rem', height: '2rem' }}>
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '2rem', height: '2rem', color: '#ffffff' }}>
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
         </svg>
       </button>
 
       {isOpen && (
-        <div 
-          className="fixed bottom-24 right-4 rounded-lg shadow-xl min-w-[200px] border border-gray-700"
-          style={{
-            position: 'fixed',
-            bottom: '6rem',
-            right: '1rem',
-            zIndex: 9999,
-            backgroundColor: '#1f2937',
-            color: '#ffffff'
-          }}
-        >
+        <>
+          {createPortal(
+            <div 
+              ref={overlayRef}
+              data-context-menu-overlay="true"
+              onClick={handleOverlayClick}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                e.nativeEvent.stopImmediatePropagation();
+                handleOverlayMouseDown(e);
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                e.nativeEvent.stopImmediatePropagation();
+                handleOverlayTouchStart(e);
+              }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 9998,
+                pointerEvents: 'auto',
+                backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                margin: 0,
+                padding: 0,
+                opacity: 1,
+                visibility: 'visible'
+              }}
+            />,
+            document.body
+          )}
+          <div 
+            ref={menuRef}
+            className="fixed bottom-24 right-4 rounded-lg shadow-xl min-w-[200px] border border-gray-700"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+            }}
+            style={{
+              position: 'fixed',
+              bottom: '6rem',
+              right: '1rem',
+              zIndex: 9999,
+              backgroundColor: '#1f2937',
+              color: '#ffffff',
+              pointerEvents: 'auto'
+            }}
+          >
           <div className="py-2">
             {currentProject.timerState.started && (
               <button
@@ -313,6 +483,7 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
             </button>
           </div>
         </div>
+        </>
       )}
     </>
   );

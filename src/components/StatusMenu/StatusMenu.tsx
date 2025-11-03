@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react';
 import { Person } from '../../types/race';
 import { ParticipantStatusType } from '../../types/participant';
 import { useTranslation } from 'react-i18next';
+import { createPortal } from 'react-dom';
 
 interface StatusMenuProps {
   person: Person;
@@ -16,10 +18,72 @@ export default function StatusMenu({
   onStatusChange
 }: StatusMenuProps) {
   const { t } = useTranslation();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const fullName = `${person.surname} ${person.name}`;
   const groupName = person.group?.name || 'Не указана';
   const paymentStatus = person.is_paid ? 'Оплачено' : 'Не оплачено';
+
+  // Блокируем скролл и клики вне меню
+  useEffect(() => {
+    // Блокируем скролл body когда меню открыто
+    document.body.style.overflow = 'hidden';
+
+    // Блокируем все клики вне меню, чтобы они не дошли до ячеек
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      
+      // Если клик был внутри меню, разрешаем его (не блокируем)
+      if (menuRef.current && menuRef.current.contains(target)) {
+        return;
+      }
+      
+      // Если клик был по overlay или его дочерним элементам (но не внутри меню) - блокируем событие
+      // чтобы оно не дошло до элементов под overlay, и закрываем меню
+      if (overlayRef.current && overlayRef.current.contains(target)) {
+        // Блокируем событие полностью, чтобы оно не дошло до элементов под overlay
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        // Вызываем onClose асинхронно, чтобы не мешать блокировке события
+        setTimeout(() => {
+          onClose();
+        }, 0);
+        return;
+      }
+      
+      // Во всех остальных случаях (клик вне overlay) - блокируем событие и закрываем меню
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      setTimeout(() => {
+        onClose();
+      }, 0);
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      handleClickOutside(e);
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      handleClickOutside(e);
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      handleClickOutside(e);
+    };
+
+    // Добавляем обработчики с capture фазой, чтобы перехватывать события до других обработчиков
+    document.addEventListener('mousedown', handleMouseDown, true);
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('touchstart', handleTouchStart, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown, true);
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('touchstart', handleTouchStart, true);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
 
   const handleStatusClick = (status: 'late' | 'absent' | 'not_set') => {
     onStatusChange(status);
@@ -27,37 +91,110 @@ export default function StatusMenu({
   };
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
+    const target = e.target as HTMLElement;
+    
+    // Если клик был внутри меню, не закрываем
+    if (menuRef.current && menuRef.current.contains(target)) {
+      e.stopPropagation();
+      return;
     }
+    
+    // Во всех остальных случаях - закрываем меню и блокируем всплытие
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    onClose();
   };
 
-  return (
+  const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    
+    // Если клик был внутри меню, не закрываем
+    if (menuRef.current && menuRef.current.contains(target)) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+    
+    // Во всех остальных случаях - закрываем меню и блокируем всплытие
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    onClose();
+  };
+
+  const handleOverlayTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    
+    // Если касание было внутри меню, не закрываем
+    if (menuRef.current && menuRef.current.contains(target)) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+    
+    // Во всех остальных случаях - закрываем меню и блокируем всплытие
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    onClose();
+  };
+
+  if (!document.body) {
+    return null;
+  }
+
+  return createPortal(
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      ref={overlayRef}
+      data-status-menu-overlay="true"
       onClick={handleOverlayClick}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
+        handleOverlayMouseDown(e);
+      }}
+      onTouchStart={(e) => {
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
+        handleOverlayTouchStart(e);
+      }}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
+        width: '100vw',
+        height: '100vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 50
+        zIndex: 99999,
+        pointerEvents: 'auto',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        margin: 0,
+        padding: 0,
+        opacity: 1,
+        visibility: 'visible'
       }}
     >
       <div 
+        ref={menuRef}
         className="rounded-lg shadow-xl p-6 border-2 border-gray-400"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+        }}
         style={{
           backgroundColor: '#f3f4f6',
           border: '2px solid #9ca3af',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           position: 'relative',
           width: '80%',
-          maxWidth: '500px'
+          maxWidth: '500px',
+          zIndex: 100000,
+          pointerEvents: 'auto',
+          margin: '1rem'
         }}
       >
         <h1 className="text-xl font-bold mb-4 text-gray-900">№ {person.bib}</h1>
@@ -134,7 +271,8 @@ export default function StatusMenu({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
