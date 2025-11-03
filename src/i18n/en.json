@@ -52,6 +52,68 @@
   "table": {
     "time": "Time",
     "corridor": "Corridor"
+  },
+  "instruction": {
+    "title": "Instruction",
+    "overview": {
+      "title": "Overview",
+      "text": "SO Start Grid is an application for sports orienteering judges, designed to manage the process of starting participants in the start area.",
+      "offlineNote": "The application can work without internet (offline mode), if you install it on your phone according to the instructions in the \"Phone Installation\" section."
+    },
+    "functions": {
+      "title": "What the application can do",
+      "projects": "You can create, save and delete as many different projects as you want. One project is one competition start on one day. For example, if you have competitions on Saturday and Sunday, you can create two projects.",
+      "grid": {
+        "title": "Working with the start grid:",
+        "info": "You can view participant information: their name (full name), which group they are in, and payment terms. To do this, simply press and hold on the participant's number.",
+        "statuses": "You can mark participants: who entered the holding area, who was late, who did not come. These marks are made in different colors directly in the grid.",
+        "timer": "The application has a built-in clock (timer) that automatically shows which start minute it is now. You don't need to manually track time - the application itself will show the needed row.",
+        "autoscroll": "The application can automatically scroll the screen so you always see the current minute. When the timer moves to the next minute, the screen scrolls to it. This function can be turned off if it interferes.",
+        "reset": "If you need to return to some minute and start from it again, you can do it. Just specify which minute to return to.",
+        "pause": "You can stop the built-in clock (timer) at any time, for example, if the start had to be paused. Then you can resume from the needed minute."
+      },
+      "report": "After the start, you can view a report: who was late and by how much, who did not come. This report can be sent to the competition secretary.",
+      "language": "The application works in Russian, English and Kazakh. You can choose a convenient language at any time."
+    },
+    "usage": {
+      "title": "How to use the application step by step",
+      "step1": "The competition secretary prepares a file with the start grid in the SportOrg program and sends it to your phone. This can be via WhatsApp, email, Telegram or any other way.",
+      "step2": "You open the application on your phone (we recommend installing it on your phone in advance so it works without internet - see the \"Phone Installation\" section at the bottom of the page). In the application, press the large \"Create Project\" button. Then select the file that the secretary sent you.",
+      "step3": "A start grid will appear on the screen - a table with participants. Check if it matches your paper protocol. Is everything correct?",
+      "step4": "Until you press the \"Start\" button, you will not be able to mark participants. This is done on purpose to avoid accidental marks. When you need to start launching participants into the start area (usually 3-5 minutes before the first participant's start), press the large \"Start\" button under the competition name.",
+      "step5": "After pressing the \"Start\" button, a yellow row will appear in the grid - this is the current start minute. The row will automatically move down as the minutes pass, and the screen will automatically scroll after it. If automatic scrolling interferes with you, you can turn it off: press the three dots in the bottom right corner of the screen (this is the menu), then find \"Auto scroll\" and turn it off.",
+      "step6": "Now, looking at the grid, launch participants into the holding area:",
+      "step6a": "If a participant does not respond when you call their number, press their number in the grid and hold your finger. A window will appear with the participant's name. Now you can call them by name.",
+      "step6b": "When a participant enters the holding area, press their number in the grid once. The number will turn green - this means the participant has entered (status \"Entered\").",
+      "step6c": "If a participant did not come and their start minute has already passed, press their number and hold your finger. In the menu that appears, select \"Absent\". The number will turn red.",
+      "step6d": "If a participant was late and came after their start minute, find their number in the grid. Press the number and hold your finger, then select \"Late\". The number will turn orange.",
+      "step7": "If for some reason you need to temporarily stop the start (for example, a technical problem), open the menu (three dots in the bottom right corner) and press \"Finish\". The timer will stop. When you can continue, press the \"Start\" button at the top of the screen again. Then in the menu, select \"Reset Timer to Row N\" and specify which minute you need to return to. IMPORTANT: when you reset the timer to an earlier minute, all participant marks that were made after that minute will disappear. For example, if you marked a participant at minute 21 as \"absent\", and then returned the timer to minute 19, the mark at minute 21 will disappear.",
+      "step8": "When all participants have started, open the menu (three dots in the bottom right corner) and press \"Report\". You will see a list of all late and absent participants. To send this information to the secretary, press the \"Export\" button at the top of the report page."
+    },
+    "installation": {
+      "title": "Phone Installation",
+      "android": {
+        "title": "Android",
+        "text": "Instructions for installing the application on Android",
+        "step1": "Open the application in Chrome browser on your Android device",
+        "step2": "At the top of the screen (or in the browser menu) find the menu button (three dots ⋮)",
+        "step3": "In the menu that opens, select \"Install app\" or \"Add to home screen\"",
+        "step4": "Press the \"Install\" button in the dialog box that appears",
+        "step5": "The application will be installed on your phone and will appear on the home screen as an icon",
+        "step6": "Now you can open the application as a regular app by pressing its icon on the home screen"
+      },
+      "ios": {
+        "title": "iOS (iPhone/iPad)",
+        "text": "Instructions for installing the application on iOS",
+        "step1": "Open the application in Safari browser on your iPhone or iPad (important: use Safari, other browsers do not support installation)",
+        "step2": "At the bottom of the screen, find the \"Share\" button (square with an arrow up)",
+        "step3": "In the menu that opens, scroll down and find the option \"Add to Home Screen\" (or \"Add to Home Screen\")",
+        "step4": "Press \"Add to Home Screen\"",
+        "step5": "If necessary, change the application name (by default it will be \"SO Start Grid\") and press \"Add\" in the top right corner",
+        "step6": "The application will be installed on your iPhone/iPad and will appear on the home screen as an icon",
+        "step7": "Now you can open the application as a regular app by pressing its icon on the home screen"
+      }
+    }
   }
 }
 

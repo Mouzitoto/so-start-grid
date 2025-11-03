@@ -20,6 +20,7 @@ export default function StatusMenu({
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const justOpenedRef = useRef<boolean>(true);
 
   const fullName = `${person.surname} ${person.name}`;
   const groupName = person.group?.name || 'Не указана';
@@ -30,8 +31,23 @@ export default function StatusMenu({
     // Блокируем скролл body когда меню открыто
     document.body.style.overflow = 'hidden';
 
+    // Игнорируем первое событие после открытия меню (чтобы не закрыть меню сразу после долгого нажатия)
+    const ignoreFirstEvent = setTimeout(() => {
+      justOpenedRef.current = false;
+    }, 300); // 300ms задержка, чтобы игнорировать событие отпускания кнопки после долгого нажатия
+
     // Блокируем все клики вне меню, чтобы они не дошли до ячеек
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      // Игнорируем события в течение первых 300ms после открытия меню
+      if (justOpenedRef.current) {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+        return;
+      }
+
       const target = e.target as Node;
       
       // Если клик был внутри меню, разрешаем его (не блокируем)
@@ -64,6 +80,10 @@ export default function StatusMenu({
       handleClickOutside(e);
     };
 
+    const handleMouseUp = (e: MouseEvent) => {
+      handleClickOutside(e);
+    };
+
     const handleClick = (e: MouseEvent) => {
       handleClickOutside(e);
     };
@@ -72,16 +92,26 @@ export default function StatusMenu({
       handleClickOutside(e);
     };
 
+    const handleTouchEnd = (e: TouchEvent) => {
+      handleClickOutside(e);
+    };
+
     // Добавляем обработчики с capture фазой, чтобы перехватывать события до других обработчиков
     document.addEventListener('mousedown', handleMouseDown, true);
+    document.addEventListener('mouseup', handleMouseUp, true);
     document.addEventListener('click', handleClick, true);
     document.addEventListener('touchstart', handleTouchStart, true);
+    document.addEventListener('touchend', handleTouchEnd, true);
 
     return () => {
+      clearTimeout(ignoreFirstEvent);
       document.removeEventListener('mousedown', handleMouseDown, true);
+      document.removeEventListener('mouseup', handleMouseUp, true);
       document.removeEventListener('click', handleClick, true);
       document.removeEventListener('touchstart', handleTouchStart, true);
+      document.removeEventListener('touchend', handleTouchEnd, true);
       document.body.style.overflow = '';
+      justOpenedRef.current = true; // Сбрасываем флаг при закрытии
     };
   }, [onClose]);
 
@@ -91,6 +121,13 @@ export default function StatusMenu({
   };
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Игнорируем события в первые 300ms после открытия меню
+    if (justOpenedRef.current) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+
     const target = e.target as HTMLElement;
     
     // Если клик был внутри меню, не закрываем
@@ -106,6 +143,13 @@ export default function StatusMenu({
   };
 
   const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Игнорируем события в первые 300ms после открытия меню
+    if (justOpenedRef.current) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+
     const target = e.target as HTMLElement;
     
     // Если клик был внутри меню, не закрываем
@@ -121,7 +165,23 @@ export default function StatusMenu({
     onClose();
   };
 
+  const handleOverlayMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Игнорируем события в первые 300ms после открытия меню
+    if (justOpenedRef.current) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+  };
+
   const handleOverlayTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Игнорируем события в первые 300ms после открытия меню
+    if (justOpenedRef.current) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
+
     const target = e.target as HTMLElement;
     
     // Если касание было внутри меню, не закрываем
@@ -135,6 +195,15 @@ export default function StatusMenu({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
     onClose();
+  };
+
+  const handleOverlayTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Игнорируем события в первые 300ms после открытия меню
+    if (justOpenedRef.current) {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      return;
+    }
   };
 
   if (!document.body) {
@@ -151,10 +220,20 @@ export default function StatusMenu({
         e.nativeEvent.stopImmediatePropagation();
         handleOverlayMouseDown(e);
       }}
+      onMouseUp={(e) => {
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
+        handleOverlayMouseUp(e);
+      }}
       onTouchStart={(e) => {
         e.stopPropagation();
         e.nativeEvent.stopImmediatePropagation();
         handleOverlayTouchStart(e);
+      }}
+      onTouchEnd={(e) => {
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
+        handleOverlayTouchEnd(e);
       }}
       style={{
         position: 'fixed',

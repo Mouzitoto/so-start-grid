@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico'],
+      includeAssets: ['favicon.svg', 'favicon.ico'],
       manifest: {
         name: 'SO Start Grid',
         short_name: 'Start Grid',
@@ -18,7 +18,13 @@ export default defineConfig({
         theme_color: '#2563eb',
         background_color: '#ffffff',
         display: 'standalone',
-        icons: []
+        icons: [
+          {
+            src: '/favicon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml'
+          }
+        ]
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}']

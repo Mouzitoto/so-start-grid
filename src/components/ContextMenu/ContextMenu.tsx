@@ -5,6 +5,7 @@ import { calculateIntervals } from '../../utils/time';
 import ResetTimerDialog from '../ResetTimerDialog/ResetTimerDialog';
 import DeleteProjectDialog from '../DeleteProjectDialog/DeleteProjectDialog';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface ContextMenuProps {
   onShowReport: () => void;
@@ -22,6 +23,7 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
     language
   } = useProject();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   
   const [isOpen, setIsOpen] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
@@ -385,6 +387,18 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               {t('common.report')}
+            </button>
+            <button
+              onClick={() => {
+                navigate('/instruction');
+                setIsOpen(false);
+              }}
+              className="w-full text-left transition-colors"
+              style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {t('instruction.title')}
             </button>
             <div className="relative">
               <button
