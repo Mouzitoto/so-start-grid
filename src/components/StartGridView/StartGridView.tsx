@@ -43,7 +43,7 @@ export default function StartGridView() {
   });
 
   return (
-    <div className="h-screen w-screen overflow-hidden" style={{ height: '100vh', width: '100vw' }}>
+    <div className="h-screen w-screen" style={{ height: '100vh', width: '100vw', overflow: 'hidden', position: 'relative' }}>
       {!showReport ? (
         <>
           <Timer rows={rows} />

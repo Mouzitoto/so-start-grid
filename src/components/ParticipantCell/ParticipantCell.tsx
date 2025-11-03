@@ -169,10 +169,13 @@ export default function ParticipantCell({
         className={clsx(
           'w-full h-12 flex items-center justify-center rounded transition-colors text-sm font-medium',
           getStatusColor(),
-          'touch-none select-none',
+          'select-none',
           timerStarted ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'
         )}
-        style={getStatusStyle()}
+        style={{
+          ...getStatusStyle(),
+          touchAction: 'manipulation'
+        }}
         onClick={handleClick}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}

@@ -155,7 +155,9 @@ export default function StartGridTable({ rows, maxCorridors, competitionTitle }:
         scrollBehavior: 'smooth',
         height: '100vh',
         width: '100%',
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
+        touchAction: 'pan-y',
+        WebkitOverflowScrolling: 'touch'
       }}
     >
       <div className="bg-blue-600 text-white px-4 py-3 text-center shadow-md">
