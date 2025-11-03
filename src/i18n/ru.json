@@ -1,0 +1,52 @@
+{
+  "common": {
+    "createProject": "Создать проект",
+    "start": "Старт",
+    "finish": "Завершить",
+    "report": "Отчет",
+    "language": "Язык",
+    "backToProjects": "Вернуться к списку проектов",
+    "deleteProject": "Удалить текущий проект",
+    "resetTimer": "Сбросить таймер на N строку",
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "delete": "Удалить",
+    "save": "Сохранить",
+    "close": "Закрыть"
+  },
+  "status": {
+    "entered": "Зашел",
+    "late": "Опоздал",
+    "absent": "Не пришел",
+    "reset": "Сбросить"
+  },
+  "menu": {
+    "autoScroll": "Авто скроллинг текущей минуты"
+  },
+  "dialogs": {
+    "deleteProjectTitle": "Удаление проекта",
+    "deleteProjectMessage": "Вы уверены, что хотите удалить проект \"{{name}}\"? Это действие нельзя отменить.",
+    "resetTimerTitle": "Сброс таймера",
+    "resetTimerMessage": "Все статусы участников после этой строки будут сброшены, вы уверены?",
+    "resetTimerInput": "Номер строки"
+  },
+  "report": {
+    "title": "Отчет",
+    "statistics": "Общая статистика",
+    "totalEntered": "Зашли",
+    "totalLate": "Опоздали",
+    "totalAbsent": "Не пришли",
+    "totalNotMarked": "Не отмечены",
+    "lateParticipants": "Опоздавшие",
+    "absentParticipants": "Не пришедшие",
+    "notMarkedParticipants": "Не отмеченные",
+    "exportJSON": "Экспорт в JSON",
+    "exportCSV": "Экспорт в CSV",
+    "print": "Печать"
+  },
+  "project": {
+    "noProjects": "Проекты не найдены",
+    "createFirst": "Создайте первый проект, импортировав HTML файл из SportOrg"
+  }
+}
+

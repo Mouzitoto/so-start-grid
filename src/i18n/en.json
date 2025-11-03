@@ -1,0 +1,52 @@
+{
+  "common": {
+    "createProject": "Create Project",
+    "start": "Start",
+    "finish": "Finish",
+    "report": "Report",
+    "language": "Language",
+    "backToProjects": "Back to Projects",
+    "deleteProject": "Delete Current Project",
+    "resetTimer": "Reset Timer to Row N",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "save": "Save",
+    "close": "Close"
+  },
+  "status": {
+    "entered": "Entered",
+    "late": "Late",
+    "absent": "Absent",
+    "reset": "Reset"
+  },
+  "menu": {
+    "autoScroll": "Auto scroll current minute"
+  },
+  "dialogs": {
+    "deleteProjectTitle": "Delete Project",
+    "deleteProjectMessage": "Are you sure you want to delete project \"{{name}}\"? This action cannot be undone.",
+    "resetTimerTitle": "Reset Timer",
+    "resetTimerMessage": "All participant statuses after this row will be reset, are you sure?",
+    "resetTimerInput": "Row number"
+  },
+  "report": {
+    "title": "Report",
+    "statistics": "General Statistics",
+    "totalEntered": "Entered",
+    "totalLate": "Late",
+    "totalAbsent": "Absent",
+    "totalNotMarked": "Not Marked",
+    "lateParticipants": "Late Participants",
+    "absentParticipants": "Absent Participants",
+    "notMarkedParticipants": "Not Marked Participants",
+    "exportJSON": "Export to JSON",
+    "exportCSV": "Export to CSV",
+    "print": "Print"
+  },
+  "project": {
+    "noProjects": "No projects found",
+    "createFirst": "Create your first project by importing an HTML file from SportOrg"
+  }
+}
+

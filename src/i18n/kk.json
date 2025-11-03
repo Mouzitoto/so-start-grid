@@ -1,0 +1,52 @@
+{
+  "common": {
+    "createProject": "Жоба жасау",
+    "start": "Бастау",
+    "finish": "Аяқтау",
+    "report": "Есеп",
+    "language": "Тіл",
+    "backToProjects": "Жобаларға оралу",
+    "deleteProject": "Ағымдағы жобаны жою",
+    "resetTimer": "Таймерді N жолға қалпына келтіру",
+    "cancel": "Болдырмау",
+    "confirm": "Растау",
+    "delete": "Жою",
+    "save": "Сақтау",
+    "close": "Жабу"
+  },
+  "status": {
+    "entered": "Кірді",
+    "late": "Кешікті",
+    "absent": "Келмеді",
+    "reset": "Қалпына келтіру"
+  },
+  "menu": {
+    "autoScroll": "Ағымдағы минутты автоматты айналдыру"
+  },
+  "dialogs": {
+    "deleteProjectTitle": "Жобаны жою",
+    "deleteProjectMessage": "Сіз \"{{name}}\" жобасын жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті болдыру мүмкін емес.",
+    "resetTimerTitle": "Таймерді қалпына келтіру",
+    "resetTimerMessage": "Осы жолдан кейінгі барлық қатысушылардың мәртебелері қалпына келтіріледі, сіз сенімдісіз бе?",
+    "resetTimerInput": "Жол нөмірі"
+  },
+  "report": {
+    "title": "Есеп",
+    "statistics": "Жалпы статистика",
+    "totalEntered": "Кірді",
+    "totalLate": "Кешікті",
+    "totalAbsent": "Келмеді",
+    "totalNotMarked": "Белгіленбеген",
+    "lateParticipants": "Кешіккен қатысушылар",
+    "absentParticipants": "Келмеген қатысушылар",
+    "notMarkedParticipants": "Белгіленбеген қатысушылар",
+    "exportJSON": "JSON форматқа экспорттау",
+    "exportCSV": "CSV форматқа экспорттау",
+    "print": "Басып шығару"
+  },
+  "project": {
+    "noProjects": "Жобалар табылмады",
+    "createFirst": "SportOrg-тан HTML файлын импорттау арқылы алғашқы жобаңызды жасаңыз"
+  }
+}
+

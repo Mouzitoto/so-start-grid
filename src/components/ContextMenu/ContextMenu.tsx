@@ -1,0 +1,320 @@
+import { useState, useCallback } from 'react';
+import { useProject } from '../../contexts/ProjectContext';
+import { useTranslation } from 'react-i18next';
+import { calculateIntervals } from '../../utils/time';
+import ResetTimerDialog from '../ResetTimerDialog/ResetTimerDialog';
+import DeleteProjectDialog from '../DeleteProjectDialog/DeleteProjectDialog';
+
+interface ContextMenuProps {
+  onShowReport: () => void;
+}
+
+export default function ContextMenu({ onShowReport }: ContextMenuProps) {
+  const { 
+    currentProject, 
+    updateTimerState, 
+    updateSettings, 
+    updateProject,
+    backToProjects,
+    deleteProject,
+    setLanguage,
+    language
+  } = useProject();
+  const { t, i18n } = useTranslation();
+  
+  const [isOpen, setIsOpen] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const handleDeleteProject = useCallback(() => {
+    if (currentProject) {
+      const projectId = currentProject.id;
+      deleteProject(projectId);
+      backToProjects();
+      setShowDeleteDialog(false);
+      setIsOpen(false);
+    }
+  }, [currentProject, deleteProject, backToProjects]);
+
+  const handleDialogClose = useCallback(() => {
+    setShowDeleteDialog(false);
+  }, []);
+
+  const handleDialogConfirm = useCallback(() => {
+    handleDeleteProject();
+  }, [handleDeleteProject]);
+
+  if (!currentProject) return null;
+
+  const handleFinish = () => {
+    updateTimerState({
+      started: false,
+      startTime: null,
+      currentRow: null
+    });
+  };
+
+  const handleToggleAutoScroll = () => {
+    updateSettings({
+      autoScrollEnabled: !currentProject.settings.autoScrollEnabled
+    });
+  };
+
+  const handleLanguageChange = (lang: 'ru' | 'en' | 'kk') => {
+    setLanguage(lang);
+    i18n.changeLanguage(lang);
+    setShowLanguageMenu(false);
+    setIsOpen(false);
+  };
+
+  if (showResetDialog) {
+    return (
+      <ResetTimerDialog
+        onClose={() => setShowResetDialog(false)}
+        onConfirm={(rowNumber) => {
+          // Группируем участников по времени старта (как в StartGridView)
+          const groupedByTime = currentProject.raceData.persons.reduce((acc, person) => {
+            const timeKey = person.start_time.toString();
+            if (!acc[timeKey]) {
+              acc[timeKey] = [];
+            }
+            acc[timeKey].push(person);
+            return acc;
+          }, {} as Record<string, typeof currentProject.raceData.persons>);
+          
+          const sortedTimes = Object.keys(groupedByTime).sort((a, b) => 
+            parseInt(a) - parseInt(b)
+          );
+          
+          // Вычисляем интервалы между строками (нужно для пересчета startTime)
+          const rowsForIntervals = sortedTimes.map(timeKey => ({
+            startTime: parseInt(timeKey)
+          }));
+          const intervals = calculateIntervals(rowsForIntervals);
+          
+          // Вычисляем, сколько времени должно было пройти до rowNumber
+          // Интервалы: interval[0] - от строки 0 до строки 1, interval[1] - от строки 1 до строки 2, и т.д.
+          // Чтобы дойти до строки rowNumber, нужно просуммировать интервалы от 0 до rowNumber-1
+          let elapsedToRow = 0;
+          for (let i = 0; i < rowNumber && i < intervals.length; i++) {
+            elapsedToRow += intervals[i];
+          }
+          
+          // Пересчитываем startTime так, чтобы текущая строка была rowNumber
+          const now = Date.now();
+          const newStartTime = now - elapsedToRow;
+          
+          // Сброс статусов участников после указанной строки
+          const updatedStatuses = { ...currentProject.statuses };
+          
+          // Получаем все строки после rowNumber
+          for (let i = rowNumber + 1; i < sortedTimes.length; i++) {
+            const timeKey = sortedTimes[i];
+            const persons = groupedByTime[timeKey];
+            persons.forEach(person => {
+              delete updatedStatuses[`bib_${person.bib}`];
+            });
+          }
+          
+          // Сброс таймера и статусов - обновляем всё за один раз через updateProject
+          const newTimerState = {
+            started: true,
+            startTime: newStartTime,
+            currentRow: rowNumber
+          };
+          
+          // Обновляем проект с новыми timerState и статусами за один раз
+          updateProject({
+            ...currentProject,
+            timerState: newTimerState,
+            statuses: updatedStatuses,
+            updatedAt: Date.now()
+          });
+          
+          setShowResetDialog(false);
+          setIsOpen(false);
+        }}
+      />
+    );
+  }
+
+  if (showDeleteDialog) {
+    if (!currentProject) {
+      setShowDeleteDialog(false);
+      return null;
+    }
+    return (
+      <DeleteProjectDialog
+        projectName={currentProject.name}
+        onClose={handleDialogClose}
+        onConfirm={handleDialogConfirm}
+      />
+    );
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-16 h-16 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center"
+        style={{
+          position: 'fixed',
+          bottom: '1rem',
+          right: '1rem',
+          width: '4rem',
+          height: '4rem',
+          minWidth: '4rem',
+          minHeight: '4rem',
+          zIndex: 9999,
+          pointerEvents: 'auto',
+          margin: 0,
+          padding: 0,
+          border: 'none',
+          outline: 'none'
+        }}
+        aria-label="Меню"
+      >
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '2rem', height: '2rem' }}>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div 
+          className="fixed bottom-24 right-4 rounded-lg shadow-xl min-w-[200px] border border-gray-700"
+          style={{
+            position: 'fixed',
+            bottom: '6rem',
+            right: '1rem',
+            zIndex: 9999,
+            backgroundColor: '#1f2937',
+            color: '#ffffff'
+          }}
+        >
+          <div className="py-2">
+            {currentProject.timerState.started && (
+              <button
+                onClick={handleFinish}
+                className="w-full text-left transition-colors"
+                style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                {t('common.finish')}
+              </button>
+            )}
+            <button
+              onClick={() => {
+                onShowReport();
+                setIsOpen(false);
+              }}
+              className="w-full text-left transition-colors"
+              style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {t('common.report')}
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                className="w-full text-left transition-colors flex items-center justify-between"
+                style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                {t('common.language')}
+                <span className="ml-2" style={{ color: '#ffffff' }}>›</span>
+              </button>
+              {showLanguageMenu && (
+                <div style={{ borderTop: '1px solid #4b5563', backgroundColor: '#111827' }}>
+                  <button
+                    onClick={() => handleLanguageChange('ru')}
+                    className={`w-full text-left transition-colors ${language === 'ru' ? 'font-semibold' : ''}`}
+                    style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '2rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    Русский
+                  </button>
+                  <button
+                    onClick={() => handleLanguageChange('en')}
+                    className={`w-full text-left transition-colors ${language === 'en' ? 'font-semibold' : ''}`}
+                    style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '2rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => handleLanguageChange('kk')}
+                    className={`w-full text-left transition-colors ${language === 'kk' ? 'font-semibold' : ''}`}
+                    style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '2rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    Қазақша
+                  </button>
+                </div>
+              )}
+            </div>
+            {currentProject.timerState.started && (
+              <button
+                onClick={handleToggleAutoScroll}
+                className="w-full text-left transition-colors flex items-center justify-between"
+                style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                {t('menu.autoScroll')}
+                <span style={{ fontSize: '1.125rem', color: currentProject.settings.autoScrollEnabled ? '#10b981' : '#9ca3af' }}>
+                  {currentProject.settings.autoScrollEnabled ? '✓' : '○'}
+                </span>
+              </button>
+            )}
+            {currentProject.timerState.started && (
+              <button
+                onClick={() => {
+                  setShowResetDialog(true);
+                  setIsOpen(false);
+                }}
+                className="w-full text-left transition-colors"
+                style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                {t('common.resetTimer')}
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setShowDeleteDialog(true);
+                setIsOpen(false);
+              }}
+              className="w-full text-left transition-colors"
+              style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ef4444', backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {t('common.deleteProject')}
+            </button>
+            <button
+              onClick={() => {
+                backToProjects();
+                setIsOpen(false);
+              }}
+              className="w-full text-left transition-colors"
+              style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {t('common.backToProjects')}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
