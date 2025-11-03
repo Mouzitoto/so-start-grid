@@ -1,6 +1,6 @@
 import { useProject } from '../../contexts/ProjectContext';
 import { useTranslation } from 'react-i18next';
-import { generateReport, exportToCSV, downloadFile } from '../../utils/export';
+import { generateReport, exportToTXT, downloadFile } from '../../utils/export';
 
 interface ReportViewProps {
   onClose: () => void;
@@ -17,16 +17,16 @@ export default function ReportView({ onClose }: ReportViewProps) {
   const handleShare = async () => {
     if (!navigator.share) {
       // Если Web Share API не поддерживается, скачиваем файл
-      const csv = exportToCSV(currentProject);
-      downloadFile(csv, `report_${currentProject.id}.csv`, 'text/csv');
+      const txt = exportToTXT(currentProject);
+      downloadFile(txt, `report_${currentProject.id}.txt`, 'text/plain');
       return;
     }
 
     try {
-      // Создаем CSV файл для шаринга
-      const csv = exportToCSV(currentProject);
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const file = new File([blob], `report_${currentProject.id}.csv`, { type: 'text/csv' });
+      // Создаем TXT файл для шаринга
+      const txt = exportToTXT(currentProject);
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const file = new File([blob], `report_${currentProject.id}.txt`, { type: 'text/plain' });
       
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
@@ -38,7 +38,7 @@ export default function ReportView({ onClose }: ReportViewProps) {
         // Если нельзя шарить файл, шарим текст
         await navigator.share({
           title: `${currentProject.name} - ${t('report.title')}`,
-          text: csv
+          text: txt
         });
       }
     } catch (error) {

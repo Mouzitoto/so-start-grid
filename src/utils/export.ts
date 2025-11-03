@@ -92,29 +92,53 @@ export function exportToJSON(project: Project, report: ReportData): string {
 }
 
 /**
- * Экспорт в CSV
+ * Экспорт в TXT
  */
-export function exportToCSV(project: Project): string {
-  const { raceData, statuses } = project;
-  const rows: string[] = [];
+export function exportToTXT(project: Project): string {
+  const report = generateReport(project);
+  const lines: string[] = [];
   
-  // Заголовок
-  rows.push('Bib,Name,Surname,Group,Status,DelayMinutes');
+  // Общее количество участников
+  const totalParticipants = report.totalEntered + report.totalLate + report.totalAbsent + report.totalNotMarked;
+  lines.push(`Всего участников: ${totalParticipants}`);
+  lines.push('');
   
-  // Данные
-  raceData.persons.forEach(person => {
-    const statusKey = `bib_${person.bib}`;
-    const status = statuses[statusKey];
-    const statusStr = status?.status || 'not_set';
-    const delayStr = status?.delayMinutes?.toString() || '';
-    const groupName = person.group?.name || '';
-    
-    rows.push(
-      `${person.bib},"${person.name}","${person.surname}","${groupName}",${statusStr},${delayStr}`
-    );
-  });
+  // Зашли
+  lines.push(`Зашли: ${report.totalEntered}`);
+  lines.push('');
   
-  return rows.join('\n');
+  // Опоздали
+  if (report.lateParticipants.length > 0) {
+    lines.push(`Опоздали: ${report.totalLate}`);
+    report.lateParticipants.forEach(p => {
+      const fullName = `${p.surname} ${p.name}`;
+      const delayText = p.delayMinutes ? `${p.delayMinutes} минут` : '';
+      lines.push(`${p.bib},"${fullName}","${p.group}",${delayText}`);
+    });
+    lines.push('');
+  }
+  
+  // Не пришли
+  if (report.absentParticipants.length > 0) {
+    lines.push(`Не пришли: ${report.totalAbsent}`);
+    report.absentParticipants.forEach(p => {
+      const fullName = `${p.surname} ${p.name}`;
+      lines.push(`${p.bib},"${fullName}","${p.group}"`);
+    });
+    lines.push('');
+  }
+  
+  // Не отмечены
+  if (report.notMarkedParticipants.length > 0) {
+    lines.push(`Не отмечены: ${report.totalNotMarked}`);
+    report.notMarkedParticipants.forEach(p => {
+      const fullName = `${p.surname} ${p.name}`;
+      lines.push(`${p.bib},"${fullName}","${p.group}"`);
+    });
+    lines.push('');
+  }
+  
+  return lines.join('\n');
 }
 
 /**
