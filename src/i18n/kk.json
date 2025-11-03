@@ -12,7 +12,8 @@
     "confirm": "Растау",
     "delete": "Жою",
     "save": "Сақтау",
-    "close": "Жабу"
+    "close": "Жабу",
+    "export": "Экспорт"
   },
   "status": {
     "entered": "Кірді",

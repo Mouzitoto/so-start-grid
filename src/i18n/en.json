@@ -12,7 +12,8 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "save": "Save",
-    "close": "Close"
+    "close": "Close",
+    "export": "Export"
   },
   "status": {
     "entered": "Entered",

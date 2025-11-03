@@ -1,6 +1,6 @@
 import { useProject } from '../../contexts/ProjectContext';
 import { useTranslation } from 'react-i18next';
-import { generateReport, exportToJSON, exportToCSV, downloadFile } from '../../utils/export';
+import { generateReport, exportToCSV, downloadFile } from '../../utils/export';
 
 interface ReportViewProps {
   onClose: () => void;
@@ -14,28 +14,55 @@ export default function ReportView({ onClose }: ReportViewProps) {
 
   const report = generateReport(currentProject);
 
-  const handleExportJSON = () => {
-    const json = exportToJSON(currentProject, report);
-    downloadFile(json, `report_${currentProject.id}.json`, 'application/json');
-  };
+  const handleShare = async () => {
+    if (!navigator.share) {
+      // Если Web Share API не поддерживается, скачиваем файл
+      const csv = exportToCSV(currentProject);
+      downloadFile(csv, `report_${currentProject.id}.csv`, 'text/csv');
+      return;
+    }
 
-  const handleExportCSV = () => {
-    const csv = exportToCSV(currentProject);
-    downloadFile(csv, `report_${currentProject.id}.csv`, 'text/csv');
-  };
-
-  const handlePrint = () => {
-    window.print();
+    try {
+      // Создаем CSV файл для шаринга
+      const csv = exportToCSV(currentProject);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const file = new File([blob], `report_${currentProject.id}.csv`, { type: 'text/csv' });
+      
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `${currentProject.name} - ${t('report.title')}`,
+          text: t('report.title'),
+          files: [file]
+        });
+      } else {
+        // Если нельзя шарить файл, шарим текст
+        await navigator.share({
+          title: `${currentProject.name} - ${t('report.title')}`,
+          text: csv
+        });
+      }
+    } catch (error) {
+      // Пользователь отменил шаринг или произошла ошибка
+      // Можно показать уведомление, но не обязательно
+      console.error('Ошибка при шаринге:', error);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+    <div className="h-screen bg-gray-50 overflow-y-auto" style={{ padding: '1rem', height: '100vh' }}>
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg" style={{ padding: '1rem' }}>
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{t('report.title')}</h1>
+          <button
+            onClick={handleShare}
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+            style={{ padding: 'calc(0.5rem * 1.3) calc(1rem * 1.3)', fontSize: 'calc(1rem * 1.3)' }}
+          >
+            {t('common.export')}
+          </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+            className="bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+            style={{ padding: 'calc(0.5rem * 1.3) calc(1rem * 1.3)', fontSize: 'calc(1rem * 1.3)' }}
           >
             {t('common.close')}
           </button>
@@ -48,35 +75,35 @@ export default function ReportView({ onClose }: ReportViewProps) {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-300 p-2 text-left">{t('report.totalEntered')}</th>
-                    <th className="border border-gray-300 p-2 text-left">{t('report.totalLate')}</th>
-                    <th className="border border-gray-300 p-2 text-left">{t('report.totalAbsent')}</th>
-                    <th className="border border-gray-300 p-2 text-left">{t('report.totalNotMarked')}</th>
+                    <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>{t('report.totalEntered')}</th>
+                    <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>{t('report.totalLate')}</th>
+                    <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>{t('report.totalAbsent')}</th>
+                    <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>{t('report.totalNotMarked')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td 
-                      className="border border-gray-300 p-4 text-2xl font-bold text-center text-white"
-                      style={{ backgroundColor: '#10b981' }}
+                      className="border border-gray-300 text-2xl font-bold text-center text-white"
+                      style={{ backgroundColor: '#10b981', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}
                     >
                       {report.totalEntered}
                     </td>
                     <td 
-                      className="border border-gray-300 p-4 text-2xl font-bold text-center text-white"
-                      style={{ backgroundColor: '#eab308' }}
+                      className="border border-gray-300 text-2xl font-bold text-center text-white"
+                      style={{ backgroundColor: '#eab308', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}
                     >
                       {report.totalLate}
                     </td>
                     <td 
-                      className="border border-gray-300 p-4 text-2xl font-bold text-center text-white"
-                      style={{ backgroundColor: '#ef4444' }}
+                      className="border border-gray-300 text-2xl font-bold text-center text-white"
+                      style={{ backgroundColor: '#ef4444', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}
                     >
                       {report.totalAbsent}
                     </td>
                     <td 
-                      className="border border-gray-300 p-4 text-2xl font-bold text-center"
-                      style={{ backgroundColor: '#e5e7eb', color: '#1f2937' }}
+                      className="border border-gray-300 text-2xl font-bold text-center"
+                      style={{ backgroundColor: '#e5e7eb', color: '#1f2937', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}
                     >
                       {report.totalNotMarked}
                     </td>
@@ -93,19 +120,19 @@ export default function ReportView({ onClose }: ReportViewProps) {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="border border-gray-300 p-2 text-left">№</th>
-                      <th className="border border-gray-300 p-2 text-left">ФИО</th>
-                      <th className="border border-gray-300 p-2 text-left">Группа</th>
-                      <th className="border border-gray-300 p-2 text-left">Опоздание (мин)</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>№</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>ФИО</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>Группа</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>Опоздание (мин)</th>
                     </tr>
                   </thead>
                   <tbody>
                     {report.lateParticipants.map((p, idx) => (
                       <tr key={idx}>
-                        <td className="border border-gray-300 p-2">{p.bib}</td>
-                        <td className="border border-gray-300 p-2">{p.surname} {p.name}</td>
-                        <td className="border border-gray-300 p-2">{p.group}</td>
-                        <td className="border border-gray-300 p-2">{p.delayMinutes || 0}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.bib}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.surname} {p.name}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.group}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.delayMinutes || 0}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -121,17 +148,17 @@ export default function ReportView({ onClose }: ReportViewProps) {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="border border-gray-300 p-2 text-left">№</th>
-                      <th className="border border-gray-300 p-2 text-left">ФИО</th>
-                      <th className="border border-gray-300 p-2 text-left">Группа</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>№</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>ФИО</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>Группа</th>
                     </tr>
                   </thead>
                   <tbody>
                     {report.absentParticipants.map((p, idx) => (
                       <tr key={idx}>
-                        <td className="border border-gray-300 p-2">{p.bib}</td>
-                        <td className="border border-gray-300 p-2">{p.surname} {p.name}</td>
-                        <td className="border border-gray-300 p-2">{p.group}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.bib}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.surname} {p.name}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.group}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -147,17 +174,17 @@ export default function ReportView({ onClose }: ReportViewProps) {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="border border-gray-300 p-2 text-left">№</th>
-                      <th className="border border-gray-300 p-2 text-left">ФИО</th>
-                      <th className="border border-gray-300 p-2 text-left">Группа</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>№</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>ФИО</th>
+                      <th className="border border-gray-300 text-left" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>Группа</th>
                     </tr>
                   </thead>
                   <tbody>
                     {report.notMarkedParticipants.map((p, idx) => (
                       <tr key={idx}>
-                        <td className="border border-gray-300 p-2">{p.bib}</td>
-                        <td className="border border-gray-300 p-2">{p.surname} {p.name}</td>
-                        <td className="border border-gray-300 p-2">{p.group}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.bib}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.surname} {p.name}</td>
+                        <td className="border border-gray-300" style={{ paddingLeft: '0.2rem', paddingRight: '0.2rem', paddingBottom: '0.1rem' }}>{p.group}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -165,27 +192,6 @@ export default function ReportView({ onClose }: ReportViewProps) {
               </div>
             </section>
           )}
-
-          <div className="flex gap-4 pt-4 border-t">
-            <button
-              onClick={handleExportJSON}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            >
-              {t('report.exportJSON')}
-            </button>
-            <button
-              onClick={handleExportCSV}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            >
-              {t('report.exportCSV')}
-            </button>
-            <button
-              onClick={handlePrint}
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-            >
-              {t('report.print')}
-            </button>
-          </div>
         </div>
       </div>
     </div>

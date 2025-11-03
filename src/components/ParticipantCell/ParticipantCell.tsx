@@ -45,7 +45,6 @@ export default function ParticipantCell({
     }
     
     longPressTimer.current = window.setTimeout(() => {
-      console.log('Long press detected, opening menu');
       menuJustOpenedRef.current = true;
       setShowMenu(true);
       // Сбрасываем флаг через небольшую задержку
@@ -88,7 +87,6 @@ export default function ParticipantCell({
     
     if (e.button === 0) { // Левая кнопка мыши
       longPressTimer.current = window.setTimeout(() => {
-        console.log('Long press detected, opening menu');
         menuJustOpenedRef.current = true;
         setShowMenu(true);
         // Сбрасываем флаг через небольшую задержку
@@ -189,19 +187,15 @@ export default function ParticipantCell({
         </div>
       </div>
       {showMenu && (
-        <>
-          {console.log('Rendering StatusMenu, showMenu:', showMenu)}
-          <StatusMenu
-            person={person}
-            currentStatus={status}
-            onClose={() => {
-              console.log('StatusMenu onClose called');
-              menuJustOpenedRef.current = false;
-              setShowMenu(false);
-            }}
-            onStatusChange={onStatusChange}
-          />
-        </>
+        <StatusMenu
+          person={person}
+          currentStatus={status}
+          onClose={() => {
+            menuJustOpenedRef.current = false;
+            setShowMenu(false);
+          }}
+          onStatusChange={onStatusChange}
+        />
       )}
     </>
   );
