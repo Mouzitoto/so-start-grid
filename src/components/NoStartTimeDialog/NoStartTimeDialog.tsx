@@ -37,7 +37,7 @@ export default function NoStartTimeDialog({ onClose }: NoStartTimeDialogProps) {
     });
   };
 
-  const handleTouchStart = (person: Person, e: React.TouchEvent) => {
+  const handleTouchStart = (person: Person) => {
     longPressTimer.current = window.setTimeout(() => {
       setShowMenu(person.bib);
     }, 500);
@@ -250,7 +250,7 @@ export default function NoStartTimeDialog({ onClose }: NoStartTimeDialogProps) {
                         handlePersonClick(person.bib);
                       }
                     }}
-                    onTouchStart={(e) => handleTouchStart(person, e)}
+                    onTouchStart={() => handleTouchStart(person)}
                     onTouchEnd={handleTouchEnd}
                     onTouchMove={handleTouchMove}
                     onMouseDown={(e) => handleMouseDown(person, e)}

@@ -14,7 +14,7 @@ interface NoStartTimeMenuProps {
 }
 
 export default function NoStartTimeMenu({
-  person,
+  person: _person,
   currentStatus,
   onClose,
   onStatusChange,

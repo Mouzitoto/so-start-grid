@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { parseSportOrgHTML } from '../../utils/parser';
 import { createPortal } from 'react-dom';
 
 interface FileUpdateDialogProps {
