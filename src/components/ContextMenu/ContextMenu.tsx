@@ -4,8 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { calculateIntervals } from '../../utils/time';
 import ResetTimerDialog from '../ResetTimerDialog/ResetTimerDialog';
 import DeleteProjectDialog from '../DeleteProjectDialog/DeleteProjectDialog';
+import FileUpdateDialog from '../FileUpdateDialog/FileUpdateDialog';
+import AddParticipantDialog from '../AddParticipantDialog/AddParticipantDialog';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { parseSportOrgHTML } from '../../utils/parser';
 
 interface ContextMenuProps {
   onShowReport: () => void;
@@ -17,6 +20,7 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
     updateTimerState, 
     updateSettings, 
     updateProject,
+    updateProjectFromFile,
     backToProjects,
     deleteProject,
     setLanguage,
@@ -29,6 +33,9 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [showAddParticipantDialog, setShowAddParticipantDialog] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -190,6 +197,35 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
     setIsOpen(false);
   };
 
+  const handleFileSelected = async (file: File) => {
+    setUpdateError(null);
+    
+    try {
+      const text = await file.text();
+      const raceData = parseSportOrgHTML(text);
+      
+      if (!raceData) {
+        setUpdateError(t('project.createFirst'));
+        return;
+      }
+      
+      const result = updateProjectFromFile(raceData);
+      
+      if (!result.success) {
+        // Используем локализованную ошибку
+        setUpdateError(t('dialogs.updateFromFileError'));
+        return;
+      }
+      
+      // Успешно обновлено
+      setShowUpdateDialog(false);
+      setIsOpen(false);
+    } catch (err) {
+      console.error('Ошибка обработки файла:', err);
+      setUpdateError(t('project.createFirst'));
+    }
+  };
+
   if (showResetDialog) {
     return (
       <ResetTimerDialog
@@ -275,6 +311,24 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
     );
   }
 
+  if (showUpdateDialog) {
+    return (
+      <FileUpdateDialog
+        onClose={() => {
+          setShowUpdateDialog(false);
+          setUpdateError(null);
+          setIsOpen(false);
+        }}
+        onFileSelected={handleFileSelected}
+        error={updateError}
+      />
+    );
+  }
+
+  if (showAddParticipantDialog) {
+    return <AddParticipantDialog onClose={() => setShowAddParticipantDialog(false)} />;
+  }
+
   return (
     <>
       <button
@@ -358,6 +412,7 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
               position: 'fixed',
               bottom: '6rem',
               right: '1rem',
+              left: '1rem',
               zIndex: 9999,
               backgroundColor: '#1f2937',
               color: '#ffffff',
@@ -399,6 +454,30 @@ export default function ContextMenu({ onShowReport }: ContextMenuProps) {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               {t('instruction.title')}
+            </button>
+            <button
+              onClick={() => {
+                setShowUpdateDialog(true);
+                setIsOpen(false);
+              }}
+              className="w-full text-left transition-colors"
+              style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {t('common.updateFromFile')}
+            </button>
+            <button
+              onClick={() => {
+                setShowAddParticipantDialog(true);
+                setIsOpen(false);
+              }}
+              className="w-full text-left transition-colors"
+              style={{ paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem', minHeight: '3.5rem', fontSize: '1.125rem', color: '#ffffff', backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {t('common.addParticipant')}
             </button>
             <div className="relative">
               <button

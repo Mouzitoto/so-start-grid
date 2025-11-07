@@ -275,7 +275,8 @@ export default function Instruction() {
           <section>
             <h2 className="text-2xl font-semibold mb-3">{t('instruction.functions.title')}</h2>
             <ul className="list-disc list-outside space-y-3 ml-6" style={{ paddingLeft: '1.5rem' }}>
-              <li>{t('instruction.functions.projects')}</li>
+              <li dangerouslySetInnerHTML={{ __html: highlightButtons(t('instruction.functions.projects')) }} />
+              <li dangerouslySetInnerHTML={{ __html: highlightButtons(t('instruction.functions.update')) }} />
               <li>
                 <strong>{t('instruction.functions.grid.title')}</strong>
                 <ul className="list-disc list-outside space-y-2 ml-6 mt-2" style={{ paddingLeft: '1.5rem' }}>
@@ -287,6 +288,8 @@ export default function Instruction() {
                   <li dangerouslySetInnerHTML={{ __html: highlightButtons(t('instruction.functions.grid.pause')) }} />
                 </ul>
               </li>
+              <li dangerouslySetInnerHTML={{ __html: highlightButtons(t('instruction.functions.noStartTimeList')) }} />
+              <li dangerouslySetInnerHTML={{ __html: highlightButtons(t('instruction.functions.addParticipant')) }} />
               <li>{t('instruction.functions.report')}</li>
               <li>{t('instruction.functions.language')}</li>
             </ul>
@@ -329,6 +332,7 @@ export default function Instruction() {
               </li>
               <li dangerouslySetInnerHTML={{ __html: highlightButtons(t('instruction.usage.step7')) }} />
               <li dangerouslySetInnerHTML={{ __html: highlightButtons(t('instruction.usage.step8')) }} />
+              <li dangerouslySetInnerHTML={{ __html: highlightButtons(t('instruction.usage.step9')) }} />
             </ol>
           </section>
 

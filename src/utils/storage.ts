@@ -79,6 +79,11 @@ export function createProject(raceData: Race): Project {
   const dateStr = new Date().toLocaleDateString('ru-RU');
   const projectName = `${raceData.data.title} - ${dateStr}`;
   
+  // Сохраняем bib номера участников, у которых изначально было start_time === 0
+  const noStartTimeBibs = raceData.persons
+    .filter(person => person.start_time === 0)
+    .map(person => person.bib);
+  
   const project: Project = {
     id: `project_${now}_${Math.random().toString(36).substr(2, 9)}`,
     name: projectName,
@@ -93,7 +98,8 @@ export function createProject(raceData: Race): Project {
     },
     settings: {
       autoScrollEnabled: true
-    }
+    },
+    noStartTimeBibs
   };
   
   // Сохраняем проект

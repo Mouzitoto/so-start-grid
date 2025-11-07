@@ -134,6 +134,14 @@ export default function StartGridTable({ rows, maxCorridors, competitionTitle }:
   // Определяем, скрыт ли таймер (после старта)
   const isTimerHidden = currentProject?.timerState.started || false;
 
+  // Определяем, какие коридоры нужно показать (есть хотя бы в одной строке)
+  const visibleCorridors: number[] = [];
+  for (let i = 0; i < maxCorridors; i++) {
+    if (rows.some(row => row.persons.length > i)) {
+      visibleCorridors.push(i);
+    }
+  }
+
   const handleStart = () => {
     if (!currentProject) return;
     const now = Date.now();
@@ -193,9 +201,9 @@ export default function StartGridTable({ rows, maxCorridors, competitionTitle }:
         <thead className="sticky top-0 bg-gray-100 z-10">
           <tr>
             <th className="border border-gray-300 text-center font-semibold" style={{paddingBottom: '0.1rem' }}>{t('table.time')}</th>
-            {Array.from({ length: maxCorridors }, (_, i) => (
-              <th key={i} className="border border-gray-300 text-center font-semibold" style={{paddingBottom: '0.1rem' }}>
-                {t('table.corridor')} {i + 1}
+            {visibleCorridors.map((corridorIndex) => (
+              <th key={corridorIndex} className="border border-gray-300 text-center font-semibold" style={{paddingBottom: '0.1rem' }}>
+                {t('table.corridor')} {corridorIndex + 1}
               </th>
             ))}
           </tr>
@@ -203,6 +211,7 @@ export default function StartGridTable({ rows, maxCorridors, competitionTitle }:
         <tbody>
           {rows.map((row, rowIndex) => {
             const isCurrentRow = currentRow === rowIndex;
+            
             return (
               <tr
                 key={row.startTime}
@@ -230,7 +239,7 @@ export default function StartGridTable({ rows, maxCorridors, competitionTitle }:
                 >
                   {toHHMMSS(row.startTime)}
                 </td>
-                {Array.from({ length: maxCorridors }, (_, corridorIndex) => {
+                {visibleCorridors.map((corridorIndex, visibleIndex) => {
                   const person = row.persons[corridorIndex];
                   const statusKey = person ? `bib_${person.bib}` : null;
                   const status = statusKey ? currentProject.statuses[statusKey] : null;
@@ -242,8 +251,8 @@ export default function StartGridTable({ rows, maxCorridors, competitionTitle }:
                       className="border border-gray-300 p-1"
                       style={isCurrentRow ? {
                         backgroundColor: '#fef3c7',
-                        borderLeft: corridorIndex === 0 ? '4px solid #ca8a04' : undefined,
-                        borderRight: corridorIndex === maxCorridors - 1 ? '4px solid #ca8a04' : undefined
+                        borderLeft: visibleIndex === 0 ? '4px solid #ca8a04' : undefined,
+                        borderRight: visibleIndex === visibleCorridors.length - 1 ? '4px solid #ca8a04' : undefined
                       } : undefined}
                     >
                       {person ? (

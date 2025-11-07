@@ -13,7 +13,11 @@
     "delete": "Delete",
     "save": "Save",
     "close": "Close",
-    "export": "Export"
+    "export": "Export",
+    "updateFromFile": "Update from File",
+    "add": "Add",
+    "addParticipant": "Add Participant",
+    "selectFile": "Select File"
   },
   "status": {
     "entered": "Entered",
@@ -29,7 +33,15 @@
     "deleteProjectMessage": "Are you sure you want to delete project \"{{name}}\"? This action cannot be undone.",
     "resetTimerTitle": "Reset Timer",
     "resetTimerMessage": "All participant statuses after this row will be reset, are you sure?",
-    "resetTimerInput": "Row number"
+    "resetTimerInput": "Row number",
+    "updateFromFileError": "The new file is not a correction of the original file",
+    "startTime": "Start Time",
+    "selectTime": "Select Time",
+    "participantNumber": "Participant Number",
+    "enterParticipantNumber": "Enter participant number",
+    "invalidParticipantNumber": "Enter a valid participant number",
+    "addParticipantError": "Error adding participant",
+    "addParticipantTitle": "Add Participant"
   },
   "report": {
     "title": "Report",
@@ -63,6 +75,7 @@
     "functions": {
       "title": "What the application can do",
       "projects": "You can create, save and delete as many different projects as you want. One project is one competition start on one day. For example, if you have competitions on Saturday and Sunday, you can create two projects.",
+      "update": "If the secretary sent you an updated file with the start grid (for example, new participants were added or groups/corridors were changed), you can update the current project from this file. To do this, open the menu (three dots in the bottom right corner) and select \"Update from File\". The application will check that the new file belongs to the same competition and update the grid. Important: all participant marks you have already made will be saved if their start minute is less than the current timer time. Marks for participants with later start times will be reset. The timer and its state will not change - if the timer was running, it will continue to work.",
       "grid": {
         "title": "Working with the start grid:",
         "info": "You can view participant information: their name (full name), which group they are in, and payment terms. To do this, simply press and hold on the participant's number.",
@@ -70,8 +83,11 @@
         "timer": "The application has a built-in clock (timer) that automatically shows which start minute it is now. You don't need to manually track time - the application itself will show the needed row.",
         "autoscroll": "The application can automatically scroll the screen so you always see the current minute. When the timer moves to the next minute, the screen scrolls to it. This function can be turned off if it interferes.",
         "reset": "If you need to return to some minute and start from it again, you can do it. Just specify which minute to return to.",
-        "pause": "You can stop the built-in clock (timer) at any time, for example, if the start had to be paused. Then you can resume from the needed minute."
+        "pause": "You can stop the built-in clock (timer) at any time, for example, if the start had to be paused. Then you can resume from the needed minute.",
+        "noStartTime": "If the start grid file contains participants without a start time (00:00:00), they will not be displayed in the main grid. Instead, a button with a people icon and a red badge showing the count of such participants will appear in the bottom left corner of the screen. Clicking this button opens the \"Participants without start time\" window. In this window, you can: quickly mark a participant as \"entered\" (single tap on the cell), set the \"absent\" status or reset the status (long press on the cell), and also set a start time for the participant (long press, then select time from the list). Participant cells are colored according to their status: green - entered, red - absent, gray - not marked. If a participant has a start time set, it is displayed inside the cell under the name."
       },
+      "noStartTimeList": "All participants whose start time in the file is 00:00:00 are automatically placed in the \"Participants without start time\" list. They do not appear in the main grid and are displayed only in this special list, which can be opened by clicking the button in the bottom left corner of the screen.",
+      "addParticipant": "You can add a new participant to the \"Participants without start time\" list. To do this, open the menu (three dots in the bottom right corner) and select \"Add Participant\". Enter the participant number and save. The new participant will be added to the list without a start time and without a group.",
       "report": "After the start, you can view a report: who was late and by how much, who did not come. This report can be sent to the competition secretary.",
       "language": "The application works in Russian, English and Kazakh. You can choose a convenient language at any time."
     },
@@ -87,8 +103,10 @@
       "step6b": "When a participant enters the holding area, press their number in the grid once. The number will turn green - this means the participant has entered (status \"Entered\").",
       "step6c": "If a participant did not come and their start minute has already passed, press their number and hold your finger. In the menu that appears, select \"Absent\". The number will turn red.",
       "step6d": "If a participant was late and came after their start minute, find their number in the grid. Press the number and hold your finger, then select \"Late\". The number will turn orange.",
-      "step7": "If for some reason you need to temporarily stop the start (for example, a technical problem), open the menu (three dots in the bottom right corner) and press \"Finish\". The timer will stop. When you can continue, press the \"Start\" button at the top of the screen again. Then in the menu, select \"Reset Timer to Row N\" and specify which minute you need to return to. IMPORTANT: when you reset the timer to an earlier minute, all participant marks that were made after that minute will disappear. For example, if you marked a participant at minute 21 as \"absent\", and then returned the timer to minute 19, the mark at minute 21 will disappear.",
-      "step8": "When all participants have started, open the menu (three dots in the bottom right corner) and press \"Report\". You will see a list of all late and absent participants. To send this information to the secretary, press the \"Export\" button at the top of the report page."
+      "step6e": "If the file contains participants without a start time (00:00:00), a button with a people icon and a red badge showing the count of such participants will appear in the bottom left corner of the screen. Click this button to open the \"Participants without start time\" window. In this window: a quick tap on a participant's cell marks them as \"entered\" (the cell will turn green), a long press opens a menu where you can set the \"absent\" status, reset the status, or set a start time from the list of available times. If a participant has a start time set, it is displayed inside the cell under the name. Participants without a start time remain in this list and do not appear in the main grid, even if a start time is set for them.",
+      "step7": "If the secretary sent you an updated file with the start grid (for example, new participants were added or participant groups were changed), you can update the current project. Open the menu (three dots in the bottom right corner) and select \"Update from File\". Select the new file that the secretary sent you. The application will check that this is the same competition file and update the grid. All your participant marks will be saved if their start minute is less than the current timer time. Marks for participants with later start times will be reset. The timer will continue to work as before - if it was at minute 4, it will remain at minute 4.",
+      "step8": "If for some reason you need to temporarily stop the start (for example, a technical problem), open the menu (three dots in the bottom right corner) and press \"Finish\". The timer will stop. When you can continue, press the \"Start\" button at the top of the screen again. Then in the menu, select \"Reset Timer to Row N\" and specify which minute you need to return to. IMPORTANT: when you reset the timer to an earlier minute, all participant marks that were made after that minute will disappear. For example, if you marked a participant at minute 21 as \"absent\", and then returned the timer to minute 19, the mark at minute 21 will disappear.",
+      "step9": "When all participants have started, open the menu (three dots in the bottom right corner) and press \"Report\". You will see a list of all late and absent participants. To send this information to the secretary, press the \"Export\" button at the top of the report page."
     },
     "installation": {
       "title": "Phone Installation",

@@ -22,6 +22,7 @@ export interface Project {
   statuses: Record<string, ParticipantStatus>;
   timerState: TimerState;
   settings: ProjectSettings;
+  noStartTimeBibs?: number[]; // Bib номера участников, у которых изначально было start_time === 0
 }
 
 export interface StoredData {
